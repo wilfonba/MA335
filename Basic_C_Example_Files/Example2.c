@@ -2,8 +2,6 @@
 #include <stdio.h>
 #include <math.h>
 
-double g(double x);
-
 int main(int argc, char** argv){
   double x;
   double y;

@@ -16,18 +16,15 @@ void print_array(float* arr){
   int idx=0;
   float val;
   print_array(numberlist);
-  printf("Which index would you like to change 
-  (-1 to quit)? \n");
+  printf("Which index would you like to change (-1 to quit)? \n");
   scanf("%d",&idx);
 
   while (idx!=-1){
-        printf("What value would you like to put in 
-        index %d? ",idx);
+        printf("What value would you like to put in index %d? ",idx);
         scanf("%f",&val);
         numberlist[idx]=val;
 	print_array(numberlist);
-        printf("Which index would you like to change 
-        (-1 to quit)? \n");
+        printf("Which index would you like to change (-1 to quit)? \n");
         scanf("%d",&idx);
   }
 
