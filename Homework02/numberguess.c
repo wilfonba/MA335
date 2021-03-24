@@ -5,7 +5,7 @@ int askIfCorrect(int guess)
 {
     char line[100];
     char userInput;
-    printf("Is your number %d? (Y/N) ",guess);
+    printf("Is your number %d? (Y/N) \n",guess);
     fgets(line,100,stdin);
     sscanf(line,"%s",&userInput);
     switch (userInput)
@@ -32,25 +32,25 @@ int askHighLow(int guess)
 {
     char line[100];
     char userInput;
-    printf("Is my guess too high (H) or too low (L)? ");
+    printf("Is my guess too high (H) or too low (L)? \n");
     fgets(line,100,stdin);
     sscanf(line,"%s",&userInput);
     switch (userInput)
     {
         case 'H':
-            printf("Oh, my guess was too high. \n");
+            printf("Ok, my guess was too high. \n");
             return 0;
         case 'h':
-            printf("Oh, my guess was too high. \n");
+            printf("Ok, my guess was too high. \n");
             return 0;
         case 'L':
-            printf("Oh, my guess was too low. \n");
+            printf("Ok, my guess was too low. \n");
             return 1;
         case 'l':
-            printf("Oh, my guess was too low. \n");
+            printf("Ok, my guess was too low. \n");
             return 1;
         default:
-            printf("You didn't enter a proper response.  Please respond H,h,L, or l. \n");
+            printf("You didn't enter a proper response.  Please respond H,h,L, or l \n");
             return askHighLow(guess);
     }
 }
@@ -67,22 +67,27 @@ int main()
     while (guessing == 1)
     {
         guess = (bounds[0]+bounds[1])/2;
-        //printf("Bouds 0 = %d Bounds 1 = %d Guess = %d",bounds[0],bounds[1],guess);
+        if (guess == bounds[1] || guess == bounds[1])
+        {
+            //guess = (bounds[0]+bounds[1])/2;
+            //printf("\n\nBounds 0 = %d Bounds 1 = %d Guess = %d\n\n\n",bounds[0],bounds[1],guess);
+            //guessing = askIfCorrect(guess);
+            //highLow = askHighLow(guess);
+            printf("Liar! You Cheat!\n");
+            break;
+        }
         guessing = askIfCorrect(guess);
         if (guessing == 1)
         {
+            //printf("\n\nBounds 0 = %d Bounds 1 = %d Guess = %d\n\n\n",bounds[0],bounds[1],guess);
             highLow = askHighLow(guess);
             if (highLow == 1)
             {
-               bounds[0] = guess;
+               bounds[0] = guess + 1;
             }
             if (highLow == 0)
             {
-                bounds[1] = guess;
-            }
-            if (bounds[0] >= bounds[1])
-            {
-                return 1;
+                bounds[1] = guess - 1;
             }
         }
     }

@@ -1,0 +1,34 @@
+Welcome to the wonderful world of number guessing!
+Think of an integer number between 1 and 100.
+Is your number 50? (Y/N) 
+Too bad. 
+Is my guess too high (H) or too low (L)? 
+Ok, my guess was too low. 
+Is your number 75? (Y/N) 
+Too bad. 
+Is my guess too high (H) or too low (L)? 
+Ok, my guess was too low. 
+Is your number 88? (Y/N) 
+You didn't enter a proper response.  Please respond Y,y,N,or n 
+Is your number 88? (Y/N) 
+You didn't enter a proper response.  Please respond Y,y,N,or n 
+Is your number 88? (Y/N) 
+Too bad. 
+Is my guess too high (H) or too low (L)? 
+Ok, my guess was too high. 
+Is your number 81? (Y/N) 
+You didn't enter a proper response.  Please respond Y,y,N,or n 
+Is your number 81? (Y/N) 
+Too bad. 
+Is my guess too high (H) or too low (L)? 
+You didn't enter a proper response.  Please respond H,h,L, or l. 
+Is my guess too high (H) or too low (L)? 
+You didn't enter a proper response.  Please respond H,h,L, or l. 
+Is my guess too high (H) or too low (L)? 
+Ok, my guess was too high. 
+Is your number 78? (Y/N) 
+Too bad. 
+Is my guess too high (H) or too low (L)? 
+Ok, my guess was too low. 
+Is your number 79? (Y/N) 
+Great, bye! 
