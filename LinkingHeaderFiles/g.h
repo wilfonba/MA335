@@ -1,0 +1,1 @@
+double g(double x);
