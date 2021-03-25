@@ -7,7 +7,7 @@ void main(int argc,char** argv)
 {
 
 
-  int* myarray=malloc(100*sizeof(int));
+  int* myarray=malloc(201*sizeof(int));
   int i;
 
   for (i=0;i<=200;i++){
@@ -15,5 +15,6 @@ void main(int argc,char** argv)
   }
 
   printf("%d\n",myarray[200]);
+  free(myarray);
 }
 
