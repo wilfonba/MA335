@@ -46,7 +46,19 @@ int myStrLen(char* s)
 
 void revString(char* s)
 {
-
+    int N = myStrLen(s) - 1;
+    char temp;
+    if (N < 1) 
+    {
+        return;
+    }
+    for (int iii = 0;iii < (N+1)/2;iii++)
+    {
+        temp = *(s + iii);
+        *(s + iii) = *(s + N - iii);
+        *(s + N - iii) = temp;
+    }
+    return;
 }
 
 void delEven(int* arr,int size)
