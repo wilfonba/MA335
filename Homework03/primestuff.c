@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include <strings.h>
 
 int isprime(int N)
 {
@@ -39,14 +40,26 @@ int isMersenne(int N)
 
 void prime_info(int* ns, int l, int* num_prime, int* primes, int* num_mersenne, int* mersennes)
 {
-    int a = 1;
-    a+=1;
+    *num_mersenne = 0;
+    *num_prime = 0;
+    for(int iii = 0;iii < l;iii++)
+    {
+        if (isprime(*(ns+iii)) == 1)
+        {
+            *(primes+*num_prime) = *(ns + iii);
+            *num_prime += 1;
+            if (isMersenne(*(ns+iii)) == 1)
+            {
+                *(mersennes+*num_mersenne) = *(ns + iii);
+                *num_mersenne += 1;
+            }
+        }
+    }
 }
 
 
 int main(int argv, char **argc)
 {
-    isprime(3);
-    isMersenne(3);
+    
     return 0;
 }
