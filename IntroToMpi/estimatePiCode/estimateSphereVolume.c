@@ -25,7 +25,7 @@ int main(int argc, char** argv){
   double radius;
   //test to see if the user gave us an extra command line argument for number of trials. 
   N = atoi(argv[1]);
-  radius = strtod(argv[2]),argv[3];
+  radius = strtod(argv[2],&argv[3]);
 
   //N is total number of samples to do -- how many should I (rank my_rank) do?
   int my_N=N/num_procs;
