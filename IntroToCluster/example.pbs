@@ -1,0 +1,35 @@
+#!/bin/bash
+
+#In PBS files, lines that start with #PBS are interpreted by OpenPBS.
+#Lines that start with a # but not followed by PBS are comments.
+#Lines that do not start with a # are commands to be run as part of this job. 
+
+#Set the name of the job. It will default for you to something ugly.
+#PBS -N $USER
+
+#Set the name of the generated output file and error files if you would like. I
+#generally don't change these, they deafult to reasonableness.
+##PBS -o $HOME
+##PBS -e $HOME
+
+#Request some resources, for this we use 32 cores spread across 4 nodes
+#PBS -l nodes=4:ppn=8
+
+#Limit the amount of time the job can run to 1 hour. 
+#Nice for stopping zombie processes and being a good person.
+#[hours]:[minutes]:[seconds].[milliseconds]
+
+#PBS -l walltime=01:00:00
+
+#Mail me.  Options are a,b,e.
+#a means email on abort,
+#b means email me when the job begins, e means email when the job ends.
+#PBS -m be
+
+#Get environment variables right.  Don't change this. 
+#PBS -V
+
+#$PBS_O_WORKDIR is set to wherever you launched qsub from. Alternatively, you
+#could give the fullpath using ${PBS_O_HOME}/est_pi
+cd ${PBS_O_WORKDIR}
+mpirun ./est_pi 100000000
