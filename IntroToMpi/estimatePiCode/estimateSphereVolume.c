@@ -48,9 +48,9 @@ int main(int argc, char** argv){
     //generate random coordinates.
     //rand() returns an integer between 0 and RAND_MAX
     //If we did rand()/RAND_MAX that would do integer division, which is not what we want. So so:
-    x=1.0*rand()/RAND_MAX;
-    y=1.0*rand()/RAND_MAX;
-    z=1.0*rand()/RAND_MAX;
+    x=radius*rand()/RAND_MAX;
+    y=radius*rand()/RAND_MAX;
+    z=radius*rand()/RAND_MAX;
     //see if they happen to be in unit circle
     if (x*x+y*y+z*z < pow(radius,3.0)) {
       //record success
