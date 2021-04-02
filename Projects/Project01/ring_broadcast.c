@@ -2,7 +2,6 @@
 #include<stdio.h>
 #include<mpi.h>
 
-
 void getInput(int* N)
 {
     char input[100];
@@ -11,7 +10,6 @@ void getInput(int* N)
     fgets(input,100,stdin);
     sscanf(input,"%d",N);
 }
-
 
 int main(int argc, char** argv)
 {
@@ -22,6 +20,8 @@ int main(int argc, char** argv)
     MPI_Comm_rank(MPI_COMM_WORLD,&myRank);
     int N = 1;
     int numb = 1;
+    int temp;
+    MPI_Status status;
     while (N >= 0 && numb >= 0)
     {
         if (myRank == 0)
@@ -29,22 +29,20 @@ int main(int argc, char** argv)
             getInput(&N);
             int temp;
             MPI_Status status;
-            for (int iii = 1;iii < numProcs;iii++)
-            {
-                MPI_Send(&N,1,MPI_INT,iii,0,MPI_COMM_WORLD);
-            }
-            for (int iii = 1;iii < numProcs;iii++)
-            {
-                MPI_Recv(&temp,1,MPI_INT,MPI_ANY_SOURCE,MPI_ANY_TAG,MPI_COMM_WORLD,&status);
-            }
+            MPI_Send(&N,1,MPI_INT,1,0,MPI_COMM_WORLD);
             fflush(stdout);
+        }
+        else if (myRank <= numProcs - 2)
+        {
+            MPI_Recv(&numb,1,MPI_INT,myRank-1,MPI_ANY_TAG,MPI_COMM_WORLD,&status);
+            MPI_Send(&numb,1,MPI_INT,myRank + 1,0,MPI_COMM_WORLD);
+            printf("My rank is %2d and I received the interger %d\n",myRank,numb);
         }
         else
         {
-            MPI_Status status;
-            MPI_Recv(&numb,1,MPI_INT,MPI_ANY_SOURCE,MPI_ANY_TAG,MPI_COMM_WORLD,&status);
+            MPI_Recv(&numb,1,MPI_INT,myRank-1,MPI_ANY_TAG,MPI_COMM_WORLD,&status);
             printf("My rank is %2d and I received the interger %d\n",myRank,numb);
-            MPI_Send(&numb,1,MPI_INT,0,0,MPI_COMM_WORLD);
+
         }
     }
     MPI_Finalize();
