@@ -35,7 +35,8 @@ int main(int argc, char** argv)
     int* recvBuff = calloc(messageSize,sizeof(int));
     double* tripSpeed = malloc(o.trials*sizeof(double));
     MPI_Status status;
-    for (int i = 0;i < o.trials;i++) {
+    int i = 0;
+    for (i;i < o.trials;i++) {
         double startTime = MPI_Wtime();
         if (myRank%2 == 0) {
             MPI_Send(message,messageSize,MPI_INT,myRank + 1,0,MPI_COMM_WORLD);
@@ -50,7 +51,7 @@ int main(int argc, char** argv)
     }
 
     double avgSpeed = 0;
-    for (int i = 0;i < o.trials; i++)
+    for (i = 0;i < o.trials; i++)
     {
         avgSpeed += tripSpeed[i];
     }
