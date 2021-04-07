@@ -1,5 +1,6 @@
 #include<stdio.h>
 #include<stdlib.h>
+#include<unistd.h>
 #include<mpi.h>
 
 typedef struct{
@@ -29,16 +30,33 @@ int main(int argc, char** argv)
         printf("Please enter an even number of processors\n");
         return 1;
     }
+
+    if (myRank == 0) {
+        printf("\n\nCommunication Speed Test\n");
+        printf("------------------------\n");
+        printf("Data Size: %d MB\n",o.size);
+        printf("Number of Experiments: %d \n",o.trials);
+    }
+
+    // get host name for output
+    char name[1000];
+    gethostname(name,1000);
+    printf("Rank %d on machine %s \n",myRank,name);
     
+
+    // define lots of variables for communication
     long long int messageSize = o.size*1024*1024/sizeof(int);
     int* message = calloc(messageSize,sizeof(int));
     int* recvBuff = calloc(messageSize,sizeof(int));
     double* tripSpeed = malloc(o.trials*sizeof(double));
     MPI_Status status;
+
     int i = 0;
+    // Do the communication and record times
     for (i;i < o.trials;i++) {
         double startTime = MPI_Wtime();
         if (myRank%2 == 0) {
+
             MPI_Send(message,messageSize,MPI_INT,myRank + 1,0,MPI_COMM_WORLD);
             MPI_Recv(message,messageSize,MPI_INT,myRank + 1,0,MPI_COMM_WORLD,&status);
             double endTime = MPI_Wtime();
@@ -50,6 +68,7 @@ int main(int argc, char** argv)
         }   
     }
 
+    // average times
     double avgSpeed = 0;
     for (i = 0;i < o.trials; i++)
     {
@@ -57,7 +76,9 @@ int main(int argc, char** argv)
     }
     avgSpeed = avgSpeed/o.trials;
 
+    // print outputs
     if (myRank%2 == 0)
         printf("%d <--> %d Transmission Rate: %f MB/S\n",myRank,myRank + 1,avgSpeed);
+    
     MPI_Finalize();
 }
