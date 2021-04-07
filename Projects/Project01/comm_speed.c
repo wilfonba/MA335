@@ -30,7 +30,7 @@ int main(int argc, char** argv)
         return 1;
     }
     
-    int messageSize = o.size*1024*1024/sizeof(int);
+    long long int messageSize = o.size*1024*1024/sizeof(int);
     int* message = calloc(messageSize,sizeof(int));
     int* recvBuff = calloc(messageSize,sizeof(int));
     double* tripSpeed = malloc(o.trials*sizeof(double));
