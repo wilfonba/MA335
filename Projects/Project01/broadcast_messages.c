@@ -29,7 +29,8 @@ int main(int argc, char** argv)
             getInput(&N);
             int temp;
             MPI_Status status;
-            for (int iii = 1;iii < numProcs;iii++)
+	    int iii;	
+            for (iii = 1;iii < numProcs;iii++)
             {
                 MPI_Send(&N,1,MPI_INT,iii,0,MPI_COMM_WORLD);
             }
