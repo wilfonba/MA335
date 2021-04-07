@@ -33,10 +33,6 @@ int main(int argc, char** argv)
             {
                 MPI_Send(&N,1,MPI_INT,iii,0,MPI_COMM_WORLD);
             }
-            for (int iii = 1;iii < numProcs;iii++)
-            {
-                MPI_Recv(&temp,1,MPI_INT,MPI_ANY_SOURCE,MPI_ANY_TAG,MPI_COMM_WORLD,&status);
-            }
             fflush(stdout);
         }
         else
@@ -44,7 +40,6 @@ int main(int argc, char** argv)
             MPI_Status status;
             MPI_Recv(&numb,1,MPI_INT,MPI_ANY_SOURCE,MPI_ANY_TAG,MPI_COMM_WORLD,&status);
             printf("My rank is %2d and I received the interger %d\n",myRank,numb);
-            MPI_Send(&numb,1,MPI_INT,0,0,MPI_COMM_WORLD);
         }
     }
     MPI_Finalize();
