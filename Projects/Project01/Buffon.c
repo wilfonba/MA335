@@ -43,7 +43,7 @@ int main(int argc, char** argv){
   double y_end;
   double theta;
   double numCross = 0;
-
+  srand(time(NULL) + 100*rank);
   for (i;i < T;i++) {
     x_end = 1.0*rand()/RAND_MAX;
     y_end = 1.0*rand()/RAND_MAX;
