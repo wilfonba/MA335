@@ -54,9 +54,8 @@ int main(int argc, char** argv)
     int i = 0;
     // Do the communication and record times
     for (i;i < o.trials;i++) {
-        double startTime = MPI_Wtime();
         if (myRank%2 == 0) {
-
+            double startTime = MPI_Wtime();
             MPI_Send(message,messageSize,MPI_INT,myRank + 1,0,MPI_COMM_WORLD);
             MPI_Recv(message,messageSize,MPI_INT,myRank + 1,0,MPI_COMM_WORLD,&status);
             double endTime = MPI_Wtime();
