@@ -26,7 +26,6 @@ void print_usage() {
   printf("--dictfile=<filename>    means use the dictionary stored in dictfile.  Defautls to dict.txt\n");
 }
 
-
 void parse_options(int argc, char** argv, options* opt) {
   int i;
   char dummys[1000];
@@ -84,10 +83,22 @@ void main(int argc, char** argv) {
   dict_open(opt.dictfile,&D);
 
   //Now, D.data[i] is a string with the i'th word in the dictionary in it. 
+  int i;
+  int j;
+  int k;
+  // initialize array of truples
+  int N = pow(D.size,opt.numwords);
+  int** truples = (int**)malloc(N*sizeof(int*));
+  for(i = 0;i < N;i++) {
+    truples[i] = malloc(3*sizeof(int));
+  }
+  for(i = 0;i < N;i++) {
+    for (j = 0;j < 3;j++) {
+      
+    }
+  }
 
 
-
-  
   MPI_Finalize();
   exit(MPI_SUCCESS);
 }
