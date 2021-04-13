@@ -50,7 +50,6 @@ void parse_options(int argc, char** argv, options* opt) {
       exit(1);
     }
   }
-
 }
 
 long long int times_palindrome_checked=0;
@@ -73,7 +72,7 @@ int ispalindrome(char* word) {
 
 void checkMyWords(int LB,int UB,long long int N,dictionary* D,options* opt) {
   // Check combinations of words
-  char* str = malloc(1000*sizeof(char));
+  char str[1000];
   if (opt->numwords == 1) {
     int i;
     for (i = LB;i <= UB;i++) {
@@ -163,7 +162,10 @@ void root_stuff(dictionary* D,int* size,options* opt) {
   }
   
 
-  checkMyWords(myLB,myUB,myN,D,opt);  
+  checkMyWords(myLB,myUB,myN,D,opt); 
+
+  free(procN);
+  free(procBounds); 
 }
 
 void worker_stuff(dictionary* D,int* rank,options* opt) {
