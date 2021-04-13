@@ -101,14 +101,19 @@ void checkMyWords(int LB,int UB,long long int N,dictionary* D,options* opt) {
       while (level > 0) {
         while (itrs[level] < D->size) {
           int j;
-          for (j = 0;j < opt->numwords;j++) {
+          strcpy(str,D->data[itrs[0]]);
+          for (j = 1;j < opt->numwords;j++) {
             //printf("I'm here\n");
             //printf(D->data[itrs[j]]);
             strcat(str,D->data[itrs[j]]);
           }
           //printf("%s %d\n",str,itrs[0]);
           if (ispalindrome(str)) {
-            printf("%s\n",str);
+            int k;
+            for (k=0;k < (opt->numwords) - 1;k++) {
+              printf("%s/",D->data[itrs[k]]);
+            }
+            printf("%s\n",D->data[itrs[opt->numwords -1]]);
           }
           memset(str,0,1000);
           itrs[level]++;
@@ -185,7 +190,7 @@ void worker_stuff(dictionary* D,int* rank,options* opt) {
     printf("I am process %d checking the range [%d, %d]\n",*rank,myLB,myUB);
   #endif
 
-  //checkMyWords(myLB,myUB,myN,D,opt);  
+  checkMyWords(myLB,myUB,myN,D,opt);  
 
 }
   
