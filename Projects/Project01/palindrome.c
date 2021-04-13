@@ -7,7 +7,7 @@
 
 #include "dict.c"
 
-#define debug
+//#define debug
 
 typedef struct{
   int numwords;
@@ -71,17 +71,56 @@ int ispalindrome(char* word) {
     
 }
 
-int* checkMyWords(int LB,int UB,long long int N,dictionary* D,options* opt) {
-  printf("I'm allocating memory\n");
+void checkMyWords(int LB,int UB,long long int N,dictionary* D,options* opt) {
   double start = MPI_Wtime();
-  int** toCheck = malloc(N*sizeof(int*));
+  // Define array of iterators and initialize them to zero
+  int* itrs = malloc(opt->numwords*sizeof(int));
   int i;
-  for (i = 0;i < N;i++)
-  {
-    toCheck[i] = malloc(opt->numwords*sizeof(int));
+  itrs[0] = LB;
+  for (i = 1;i < opt->numwords;i++) {
+    itrs[i] = 0;
   }
-  double end = MPI_Wtime();
-  printf("It took %lf seconds to allocate memory\n",end-start);
+  // Check combinations of words
+  int status = 1;
+  char* str = malloc(1000*sizeof(char));
+  int level;
+  if (opt->numwords == 1) {
+    for (i = LB;i <= UB;i++) {
+      if (ispalindrome(D->data[i])) {
+        printf("%s\n",D->data[i]);
+      }
+    }
+  }
+  else {
+    while (status) {
+      if (itrs[0] == UB) {
+        status = 0;
+      }
+      
+      level = 1;
+      while (level < opt->numwords) {
+        while (itrs[level] < D->size) {
+          int j;
+          for (j = 0;j < opt->numwords;j++) {
+            //printf("I'm here\n");
+            //printf(D->data[itrs[j]]);
+            strcat(str,D->data[itrs[j]]);
+          }
+          //printf("%s\n",str);
+          if (ispalindrome(str)) {
+            printf("%s\n",str);
+          }
+          memset(str,0,1000);
+          itrs[level]++;
+        }
+        itrs[level]=0;
+        level++;
+      }
+    }
+    double end = MPI_Wtime();
+    free(itrs);
+    itrs[0]++;
+  }
 }
 
 void root_stuff(dictionary* D,int* size,options* opt) {
@@ -116,6 +155,7 @@ void root_stuff(dictionary* D,int* size,options* opt) {
   // Get the upper and lower bounds for the root process
   int myLB = procBounds[0].lowerBound;
   int myUB = procBounds[0].upperBound;
+  int myN = myUB-myLB+1;
   
   #ifdef debug
     printf("I am process 0 checking the range [%d, %d]\n",myLB,myUB);
@@ -128,6 +168,8 @@ void root_stuff(dictionary* D,int* size,options* opt) {
     buffer[1] = procBounds[i].upperBound;
     MPI_Send(buffer,2,MPI_INT,i,0,MPI_COMM_WORLD);
   }
+
+  checkMyWords(myLB,myUB,myN,D,opt);  
 }
 
 void worker_stuff(dictionary* D,int* rank,options* opt) {
