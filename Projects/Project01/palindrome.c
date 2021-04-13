@@ -99,7 +99,7 @@ void checkMyWords(int LB,int UB,long long int N,dictionary* D,options* opt) {
     int i;
     int j;
     int k;
-    for (i = LB;i < UB; i++) {
+    for (i = LB;i <= UB; i++) {
       for (j = 0;j < D->size;j++) {
         for (k = 0;k < D->size;k++) {
           char str[1000];
