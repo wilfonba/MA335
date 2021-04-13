@@ -72,59 +72,48 @@ int ispalindrome(char* word) {
 }
 
 void checkMyWords(int LB,int UB,long long int N,dictionary* D,options* opt) {
-  double start = MPI_Wtime();
-  // Define array of iterators and initialize them to zero
-  int* itrs = malloc(opt->numwords*sizeof(int));
-  int i;
-  itrs[0] = LB;
-  for (i = 1;i < opt->numwords;i++) {
-    itrs[i] = 0;
-  }
   // Check combinations of words
-  int status = 1;
   char* str = malloc(1000*sizeof(char));
-  int level;
   if (opt->numwords == 1) {
+    int i;
     for (i = LB;i <= UB;i++) {
       if (ispalindrome(D->data[i])) {
         printf("%s\n",D->data[i]);
       }
     }
   }
-  else {
-    while (status) {
-      if (itrs[0] == UB) {
-        status = 0;
-      }
-      
-      level = opt->numwords-1;
-      while (level > 0) {
-        while (itrs[level] < D->size) {
-          int j;
-          strcpy(str,D->data[itrs[0]]);
-          for (j = 1;j < opt->numwords;j++) {
-            //printf("I'm here\n");
-            //printf(D->data[itrs[j]]);
-            strcat(str,D->data[itrs[j]]);
-          }
-          //printf("%s %d\n",str,itrs[0]);
-          if (ispalindrome(str)) {
-            int k;
-            for (k=0;k < (opt->numwords) - 1;k++) {
-              printf("%s/",D->data[itrs[k]]);
-            }
-            printf("%s\n",D->data[itrs[opt->numwords -1]]);
-          }
-          memset(str,0,1000);
-          itrs[level]++;
+  else if (opt->numwords == 2) {
+    int i;
+    int j;
+    for (i = LB;i < UB;i++) {
+      for (j = 0;j < D->size;j++) {
+        char str[1000];
+        strcpy(str,D->data[i]);
+        strcat(str,D->data[j]);
+        if (ispalindrome(str)) {
+          printf("%s/%s\n",D->data[i],D->data[j]);
         }
-        itrs[level]=0;
-        level--;
       }
-      itrs[0] = itrs[0] + 1;
     }
   }
-  free(itrs);
+  else if (opt->numwords == 3) {
+    int i;
+    int j;
+    int l;
+    for (i = LB;i < UB; i++) {
+      for (j = 0;j < D->size;j++) {
+        for (k = 0;k < D->size;k++) {
+          char str[1000];
+          strcpy(str,D->data[i]);
+          strcat(str,D->data[j]);
+          strcat([str,D->data[k]);
+          if (ispalindrome(str)) {
+            printf("%s/%s/%s\n",D->data[i],D->data[j],D->data[k]);
+          }
+        }
+      }
+    }
+  }
 }
 
 void root_stuff(dictionary* D,int* size,options* opt) {
