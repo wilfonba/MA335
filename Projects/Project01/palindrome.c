@@ -71,6 +71,19 @@ int ispalindrome(char* word) {
     
 }
 
+int* checkMyWords(int LB,int UB,long long int N,dictionary* D,options* opt) {
+  printf("I'm allocating memory\n");
+  double start = MPI_Wtime();
+  int** toCheck = malloc(N*sizeof(int*));
+  int i;
+  for (i = 0;i < N;i++)
+  {
+    toCheck[i] = malloc(opt->numwords*sizeof(int));
+  }
+  double end = MPI_Wtime();
+  printf("It took %lf seconds to allocate memory\n",end-start);
+}
+
 void root_stuff(dictionary* D,int* size,options* opt) {
   // allocate arrays for assignment steps
   bounds* procBounds = malloc((*size)*sizeof(bounds));
@@ -117,16 +130,21 @@ void root_stuff(dictionary* D,int* size,options* opt) {
   }
 }
 
-void worker_stuff(int* rank) {
+void worker_stuff(dictionary* D,int* rank,options* opt) {
   int buffer[2];
   MPI_Status status;
   MPI_Recv(buffer,2,MPI_INT,0,0,MPI_COMM_WORLD,&status);
   int myLB = buffer[0];
   int myUB = buffer[1];
+  int myNumWords = buffer[1] - buffer[0] + 1;
+  long long int myN = myNumWords*pow(D->size,(opt->numwords-1));
 
   #ifdef debug
     printf("I am process %d checking the range [%d, %d]\n",*rank,myLB,myUB);
   #endif
+
+  checkMyWords(myLB,myUB,myN,D,opt);  
+
 }
   
 void main(int argc, char** argv) {
@@ -145,21 +163,15 @@ void main(int argc, char** argv) {
 
   dictionary D;
   dict_open(opt.dictfile,&D);
-
   //Now, D.data[i] is a string with the i'th word in the dictionary in it. 
+  
   if (rank == 0) {
     root_stuff(&D,&size,&opt);
   }
   else {
-    worker_stuff(&rank);
+    worker_stuff(&D,&rank,&opt);
   }
 
-  /*if (rank == 0) {
-    int** truples = (int**)malloc(N*sizeof(int*));
-    for(i = 0;i < N;i++) {
-      truples[i] = malloc(3*sizeof(int));
-    }
-  }*/
   MPI_Finalize();
   exit(MPI_SUCCESS);
 }
