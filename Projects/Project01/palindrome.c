@@ -117,10 +117,9 @@ void checkMyWords(int LB,int UB,long long int N,dictionary* D,options* opt) {
         level++;
       }
     }
-    double end = MPI_Wtime();
-    free(itrs);
     itrs[0]++;
   }
+  free(itrs);
 }
 
 void root_stuff(dictionary* D,int* size,options* opt) {
