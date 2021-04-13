@@ -70,30 +70,48 @@ int ispalindrome(char* word) {
     
 }
 
-void checkMyPalindromes(int words,int* idx,dictionary* D,options* opt) {
-  if (words == 1) {
+void checkMyWords(int LB,int UB,long long int N,dictionary* D,options* opt) {
+  // Check combinations of words
+  char str[1000];
+  if (opt->numwords == 1) {
     int i;
-    char str[250];
-    strcpy(str,D->data[idx[0]]);
-    if (opt->numwords > 1) {
-      for(i = 1;i<opt->numwords;i++) {
-        strcat(str,D->data[idx[i]]);
+    for (i = LB;i <= UB;i++) {
+      if (ispalindrome(D->data[i])) {
+        printf("%s\n",D->data[i]);
       }
     }
-    if (ispalindrome(str)) {
-      printf("%s",D->data[idx[0]]);
-      for(i = 1;i < opt->numwords;i++) {
-        printf("/%s",D->data[idx[i]]);
-      }
-      printf("\n");
-    }
-    memset(str,0,250*sizeof(char));
-    return;
   }
-  int j;
-  for(j = 0;j < D->size - 1;j++) {
-    idx[words-1] = j;
-    checkMyPalindromes(words-1,idx,D,opt);
+  else if (opt->numwords == 2) {
+    int i;
+    int j;
+    for (i = LB;i < UB;i++) {
+      for (j = 0;j < D->size;j++) {
+        char str[1000];
+        strcpy(str,D->data[i]);
+        strcat(str,D->data[j]);
+        if (ispalindrome(str)) {
+          printf("%s/%s\n",D->data[i],D->data[j]);
+        }
+      }
+    }
+  }
+  else if (opt->numwords == 3) {
+    int i;
+    int j;
+    int k;
+    for (i = LB;i <= UB; i++) {
+      for (j = 0;j < D->size;j++) {
+        for (k = 0;k < D->size;k++) {
+          char str[1000];
+          strcpy(str,D->data[i]);
+          strcat(str,D->data[j]);
+          strcat(str,D->data[k]);
+          if (ispalindrome(str)) {
+            printf("%s/%s/%s\n",D->data[i],D->data[j],D->data[k]);
+          }
+        }
+      }
+    }
   }
 }
 
@@ -143,17 +161,8 @@ void root_stuff(dictionary* D,int* size,options* opt) {
     MPI_Send(buffer,2,MPI_INT,i,0,MPI_COMM_WORLD);
   }
   
-  int* idx = malloc(opt->numwords*sizeof(int));
-  int k;
-  for (k = myLB; k<= myUB; k++) {
-    int i;
-    idx[0] = k;
-    for (i = 1;i < opt->numwords;i++) {
-      idx[i] = 0;
-    }
-    checkMyPalindromes(opt->numwords,idx,D,opt);
-  }
-  free(idx);
+
+  checkMyWords(myLB,myUB,myN,D,opt); 
 
   free(procN);
   free(procBounds); 
@@ -172,17 +181,7 @@ void worker_stuff(dictionary* D,int* rank,options* opt) {
     printf("I am process %d checking the range [%d, %d]\n",*rank,myLB,myUB);
   #endif
 
-  int* idx = malloc(opt->numwords*sizeof(int));
-  int k;
-  for (k = myLB; k<= myUB; k++) {
-    int i;
-    idx[0] = k;
-    for (i = 1;i < opt->numwords;i++) {
-      idx[i] = 0;
-    }
-    checkMyPalindromes(opt->numwords,idx,D,opt);
-  }
-  free(idx);
+  checkMyWords(myLB,myUB,myN,D,opt);  
 
 }
   
