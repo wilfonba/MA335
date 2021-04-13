@@ -93,12 +93,14 @@ void checkMyWords(int LB,int UB,long long int N,dictionary* D,options* opt) {
   }
   else {
     while (status) {
+      char* line[100];
+      fgets(line,1000,stdin);
       if (itrs[0] == UB) {
         status = 0;
       }
       
-      level = 1;
-      while (level < opt->numwords) {
+      level = opt->numWords-1;
+      do {
         while (itrs[level] < D->size) {
           int j;
           for (j = 0;j < opt->numwords;j++) {
@@ -107,17 +109,17 @@ void checkMyWords(int LB,int UB,long long int N,dictionary* D,options* opt) {
             strcat(str,D->data[itrs[j]]);
           }
           //printf("%s\n",str);
-          if (ispalindrome(str)) {
-            printf("%s\n",str);
-          }
+          //if (ispalindrome(str)) {
+            //printf("%s\n",str);
+          //}
           memset(str,0,1000);
           itrs[level]++;
         }
-        itrs[level]=0;
-        level++;
-      }
+        level--;
+      } while (level > 0);
+      itrs[level]=0;
+      itrs[0]++;
     }
-    itrs[0]++;
   }
   free(itrs);
 }
@@ -167,8 +169,9 @@ void root_stuff(dictionary* D,int* size,options* opt) {
     buffer[1] = procBounds[i].upperBound;
     MPI_Send(buffer,2,MPI_INT,i,0,MPI_COMM_WORLD);
   }
+  char* line[100];
 
-  checkMyWords(myLB,myUB,myN,D,opt);  
+  //checkMyWords(myLB,myUB,myN,D,opt);  
 }
 
 void worker_stuff(dictionary* D,int* rank,options* opt) {
@@ -184,7 +187,7 @@ void worker_stuff(dictionary* D,int* rank,options* opt) {
     printf("I am process %d checking the range [%d, %d]\n",*rank,myLB,myUB);
   #endif
 
-  checkMyWords(myLB,myUB,myN,D,opt);  
+  //checkMyWords(myLB,myUB,myN,D,opt);  
 
 }
   
