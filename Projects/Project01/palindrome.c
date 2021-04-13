@@ -7,7 +7,7 @@
 
 #include "dict.c"
 
-//#define debug
+#define debug
 
 typedef struct{
   int numwords;
@@ -93,14 +93,12 @@ void checkMyWords(int LB,int UB,long long int N,dictionary* D,options* opt) {
   }
   else {
     while (status) {
-      char* line[100];
-      fgets(line,1000,stdin);
       if (itrs[0] == UB) {
         status = 0;
       }
       
-      level = opt->numWords-1;
-      do {
+      level = opt->numwords-1;
+      while (level > 0) {
         while (itrs[level] < D->size) {
           int j;
           for (j = 0;j < opt->numwords;j++) {
@@ -108,17 +106,18 @@ void checkMyWords(int LB,int UB,long long int N,dictionary* D,options* opt) {
             //printf(D->data[itrs[j]]);
             strcat(str,D->data[itrs[j]]);
           }
-          //printf("%s\n",str);
-          //if (ispalindrome(str)) {
-            //printf("%s\n",str);
-          //}
+          //printf("%s %d\n",str,itrs[0]);
+          if (ispalindrome(str)) {
+            printf("%s\n",str);
+          }
           memset(str,0,1000);
           itrs[level]++;
         }
+        itrs[level]=0;
         level--;
-      } while (level > 0);
-      itrs[level]=0;
-      itrs[0]++;
+        printf("I am here dawg\n");
+      }
+      itrs[0] = itrs[0] + 1;
     }
   }
   free(itrs);
@@ -169,9 +168,9 @@ void root_stuff(dictionary* D,int* size,options* opt) {
     buffer[1] = procBounds[i].upperBound;
     MPI_Send(buffer,2,MPI_INT,i,0,MPI_COMM_WORLD);
   }
-  char* line[100];
+  
 
-  //checkMyWords(myLB,myUB,myN,D,opt);  
+  checkMyWords(myLB,myUB,myN,D,opt);  
 }
 
 void worker_stuff(dictionary* D,int* rank,options* opt) {
