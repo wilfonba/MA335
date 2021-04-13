@@ -99,14 +99,14 @@ void checkMyWords(int LB,int UB,long long int N,dictionary* D,options* opt) {
   else if (opt->numwords == 3) {
     int i;
     int j;
-    int l;
+    int k;
     for (i = LB;i < UB; i++) {
       for (j = 0;j < D->size;j++) {
         for (k = 0;k < D->size;k++) {
           char str[1000];
           strcpy(str,D->data[i]);
           strcat(str,D->data[j]);
-          strcat([str,D->data[k]);
+          strcat(str,D->data[k]);
           if (ispalindrome(str)) {
             printf("%s/%s/%s\n",D->data[i],D->data[j],D->data[k]);
           }
