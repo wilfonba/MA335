@@ -7,7 +7,7 @@
 
 #include "dict.c"
 
-#define debug
+//#define debug
 
 typedef struct{
   int numwords;
@@ -115,7 +115,6 @@ void checkMyWords(int LB,int UB,long long int N,dictionary* D,options* opt) {
         }
         itrs[level]=0;
         level--;
-        printf("I am here dawg\n");
       }
       itrs[0] = itrs[0] + 1;
     }
