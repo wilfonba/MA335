@@ -32,4 +32,4 @@
 #$PBS_O_WORKDIR is set to wherever you launched qsub from. Alternatively, you
 #could give the fullpath using ${PBS_O_HOME}/est_pi
 cd ${PBS_O_WORKDIR}
-mpirun ./palindrome --numwords=3 > 3worldpalindromesRecursive.txt
+time mpirun ./palindrome --numwords=3 > 3worldpalindromesRecursive.txt
