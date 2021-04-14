@@ -709,6 +709,7 @@ ward/sees/draw
 ward/sexes/draw
 ward/wow/draw
 trace/sec/art
+<<<<<<< HEAD
 laid/bob/dial
 laid/deed/dial
 laid/did/dial
@@ -734,6 +735,14 @@ subtle/felt/bus
 subtle/melt/bus
 murder/are/drum
 murder/aware/drum
+=======
+epic/era/recipe
+epic/err/recipe
+epic/error/recipe
+crass/ass/arc
+drawn/even/ward
+subtle/belt/busmemset(str,0,250);
+>>>>>>> 6a8f5c8e4da94675b573abcd89c304a8795b3958
 traces/sec/art
 bar/gene/grab
 bar/grammar/grab

@@ -91,7 +91,7 @@ void checkMyPalindromes(int words,int* idx,dictionary* D,options* opt) {
     return;
   }
   int j;
-  for(j = 0;j < D->size - 1;j++) {
+  for(j = 0;j < D->size;j++) {
     idx[words-1] = j;
     checkMyPalindromes(words-1,idx,D,opt);
   }
@@ -145,7 +145,7 @@ void root_stuff(dictionary* D,int* size,options* opt) {
   
   int* idx = malloc(opt->numwords*sizeof(int));
   int k;
-  for (k = myLB; k<= myUB; k++) {
+  for (k = myLB; k <= myUB; k++) {
     int i;
     idx[0] = k;
     for (i = 1;i < opt->numwords;i++) {
