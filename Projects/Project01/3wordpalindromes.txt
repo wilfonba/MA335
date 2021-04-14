@@ -1,5 +1,3 @@
-numwords: 3
-dictfile: dict.txt
 went/revert/new
 raw/bob/war
 raw/deed/war
