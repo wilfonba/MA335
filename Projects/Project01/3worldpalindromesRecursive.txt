@@ -658,6 +658,7 @@ ward/refer/draw
 ward/sees/draw
 ward/sexes/draw
 ward/wow/draw
+<<<<<<< HEAD
 nuts/bob/stun
 nuts/deed/stun
 nuts/did/stun
@@ -680,6 +681,17 @@ par/too/trap
 par/wee/wrap
 par/were/wrap
 never/ever/even
+=======
+trace/sec/art
+epic/era/recipe
+epic/err/recipe
+epic/error/recipe
+crass/ass/arc
+drawn/even/ward
+traces/sec/art
+bar/gene/grab
+bar/grammar/grab
+>>>>>>> 71a2950adbf0c62f7ec19b3e27ef9c497f2c0648
 god/bob/dog
 god/deed/dog
 god/did/dog
@@ -1366,10 +1378,37 @@ spite/none/tips
 spite/pipe/tips
 spite/pope/tips
 spite/rare/tips
+<<<<<<< HEAD
 set/ice/cites
 set/add/dates
 set/added/dates
 set/one/denotes
+=======
+nite/divide/tin
+nite/garage/tin
+nite/nine/tin
+nite/none/tin
+nite/pipe/tin
+nite/pope/tin
+nite/rare/tin
+part/bob/trap
+part/deed/trap
+part/did/trap
+part/eye/trap
+part/gig/trap
+part/hah/trap
+part/huh/trapsubtle/belt/busmemset(str,0,250);
+part/mom/trap
+part/mum/trap
+part/noon/trap
+part/nun/trap
+part/pop/trap
+part/radar/trap
+part/refer/trap
+part/sees/trap
+part/sexes/trap
+part/wow/trap
+>>>>>>> 71a2950adbf0c62f7ec19b3e27ef9c497f2c0648
 spits/alas/tips
 spits/bobs/tips
 spits/deeds/tips
