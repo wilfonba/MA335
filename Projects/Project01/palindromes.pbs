@@ -13,7 +13,7 @@
 ##PBS -e $HOME
 
 #Request some resources, for this we use 32 cores spread across 4 nodes
-#PBS -l nodes=4:ppn=16
+#PBS -l nodes=6:ppn=16
 
 #Limit the amount of time the job can run to 2 hour. 
 #Nice for stopping zombie processes and being a good person.
@@ -32,4 +32,4 @@
 #$PBS_O_WORKDIR is set to wherever you launched qsub from. Alternatively, you
 #could give the fullpath using ${PBS_O_HOME}/est_pi
 cd ${PBS_O_WORKDIR}
-mpirun ./palindrome --numwords=3 > 3worldpalindromes.txt
+mpirun ./palindrome --numwords=3 > 3worldpalindromesRecursive.txt
