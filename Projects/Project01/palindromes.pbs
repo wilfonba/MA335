@@ -19,12 +19,13 @@
 #Nice for stopping zombie processes and being a good person.
 #[hours]:[minutes]:[seconds].[milliseconds]
 
-#PBS -l walltime=02:00:00
+#PBS -l walltime=04:00:00
 
 #Mail me.  Options are a,b,e.
 #a means email on abort,
 #b means email me when the job begins, e means email when the job ends.
-#PBS -m be
+#PBS -M wilfonba@rose-hulman.edu
+#PBS -m abe
 
 #Get environment variables right.  Don't change this. 
 #PBS -V
@@ -32,4 +33,4 @@
 #$PBS_O_WORKDIR is set to wherever you launched qsub from. Alternatively, you
 #could give the fullpath using ${PBS_O_HOME}/est_pi
 cd ${PBS_O_WORKDIR}
-mpirun ./palindrome --numwords=3 > 3worldpalindromesRecursive.txt
+mpirun ./palindrome --numwords=3 > 3WPTEST.txt
