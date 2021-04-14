@@ -850,9 +850,7 @@ epic/err/recipe
 epic/error/recipe
 crass/ass/arc
 drawn/even/ward
-subtle/belt/bus
-subtle/felt/bus
-subtle/melt/bus
+subtle/belt/busmemset(str,0,250);
 traces/sec/art
 draws/alas/ward
 draws/bobs/ward
