@@ -58,7 +58,7 @@ int main(int argc, char** argv) {
   MPI_Comm_size(MPI_COMM_WORLD,&total_procs);
   MPI_Comm_rank(MPI_COMM_WORLD,&rank);
 
-  srand(seed+rank*1000);//Consistent seed for predictable results
+  srand(seed+rank*1000); //Consistent seed for predictable results
 
   M = malloc(msg_len*sizeof(double));
 
@@ -71,6 +71,43 @@ int main(int argc, char** argv) {
   MPI_Barrier(MPI_COMM_WORLD);
 
   /* Do calculations here */
+  if (rank > 0) {
+    double totalSum = 0;
+    MPI_Reduce(M,NULL,msg_len,MPI_DOUBLE,MPI_SUM,0,MPI_COMM_WORLD);
+    MPI_Barrier(MPI_COMM_WORLD);
+    MPI_Bcast(&mu,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
+    //printf("Rank %d receiving mean: %lf \n",rank,mu);
+    int jjj;
+    double mySigmaSum = 0;
+    for (jjj = 0;jjj < msg_len;jjj++) {
+      mySigmaSum += pow(M[jjj] - mu,2);
+    }
+    //printf("Rank %d with mySigmaSum = %lf\n",rank,mySigmaSum);
+    MPI_Barrier(MPI_COMM_WORLD);
+    MPI_Reduce(&mySigmaSum,NULL,1,MPI_DOUBLE,MPI_SUM,0,MPI_COMM_WORLD);
+  }
+  else {
+    double *A = malloc(msg_len*sizeof(double));
+    MPI_Reduce(M,A,msg_len,MPI_DOUBLE,MPI_SUM,0,MPI_COMM_WORLD);
+    int iii=0;
+    double sum = 0;
+    for(iii = 0;iii < msg_len;iii++) {
+      sum += A[iii];
+    }
+    mu = sum/(msg_len*total_procs);
+    //printf("Rank 0 sending mean %lf \n",mu);
+    MPI_Barrier(MPI_COMM_WORLD);
+    MPI_Bcast(&mu,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
+    double mySigmaSum = 0;
+    for (iii = 0;iii < msg_len;iii++) {
+      mySigmaSum += pow(M[iii] - mu,2);
+    }
+    double sigmaSum;
+    MPI_Barrier(MPI_COMM_WORLD);
+    MPI_Reduce(&mySigmaSum,&sigmaSum,1,MPI_DOUBLE,MPI_SUM,0,MPI_COMM_WORLD);
+    //printf("Sigma Sum = %lf \n",sigmaSum);
+    sigma = sqrt((1.0/(msg_len*total_procs - 1))*sigmaSum);
+  }
 
   fflush(stdout);
   MPI_Barrier(MPI_COMM_WORLD);
