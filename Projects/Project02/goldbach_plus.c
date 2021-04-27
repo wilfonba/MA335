@@ -123,7 +123,7 @@ void rootStuff(options* opt) {
       for (i = 1;i<numProcs;i++) {
         if (i != workerID) {
           MPI_Recv(&SUCCESS,3,MPI_LONG,i,REQUEST_TASK,MPI_COMM_WORLD,&status);
-          if (SUCCESS[0] < N) {
+          if (SUCCESS[0] < N && SUCCESS[0] != 0) {
             N = SUCCESS[0];
             a = SUCCESS[1];
             b = SUCCESS[2];
