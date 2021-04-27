@@ -102,14 +102,17 @@ void rootStuff(options* opt){
   // with as (id, lower index, upper index)
   int tasksAssigned = 0;
   int tasksCompleted = 0;
-  int lastTask[3] = {-1,1,1};
+  int lastTask[3] = {-1,1,-1};
   // Assign each worker an initial task unless there are none left to assign
   int i = 0;
   for(i = 1;i < numProcs;i++) {
     if (tasksAssigned < numTasks){ 
+      #ifdef DEBUGGING
+        printf("%d/%d/%d\n",tasksAssigned,tasksCompleted,numTasks);
+      #endif
       lastTask[0]++;
       lastTask[1] = lastTask[2] + 1;
-      lastTask[2] = min(lastTask[1]+opt->chunksize-1, opt->num_to_partition);
+      lastTask[2] = min(lastTask[1]+opt->chunksize - 1, opt->num_to_partition - 1);
       int nData = lastTask[2] - lastTask[1] + 1;
       sendTask(lastTask,nData,opt,i);
       tasksAssigned++;
@@ -121,18 +124,21 @@ void rootStuff(options* opt){
   // Allocate remaining tasks
   while(tasksCompleted < numTasks) {
     MPI_Status status;
+    #ifdef DEBUGGING
+      printf("%d/%d/%d\n",tasksAssigned,tasksCompleted,numTasks);
+    #endif
     // Receive request for new task
     int buff;
-    MPI_Recv(&buff,1,MPI_INT,MPI_ANY_SOURCE,REQUEST_TASK,MPI_COMM_WORLD,&status);
+    MPI_Recv(NULL,0,MPI_INT,MPI_ANY_SOURCE,REQUEST_TASK,MPI_COMM_WORLD,&status);
     int workerID = status.MPI_SOURCE;
     tasksCompleted++;
     // Assign requesting core a new task if there exists remaining tasks
     if (tasksAssigned < numTasks) {
       lastTask[0]++;
       lastTask[1] = lastTask[2] + 1;
-      lastTask[2] = min(lastTask[1]+opt->chunksize-1, opt->num_to_partition);
+      lastTask[2] = min(lastTask[1]+opt->chunksize-1, opt->num_to_partition - 1);
       int nData = lastTask[2] - lastTask[1] + 1;
-      sendTask(lastTask,nData,opt,i);
+      sendTask(lastTask,nData,opt,workerID);
       tasksAssigned++;
     }
     // Send quite message if no tasks remain
@@ -145,18 +151,44 @@ void rootStuff(options* opt){
 void workerStuff(options* opt){
   int rank = my_rank();
   MPI_Status status;
+  int nRecv;
   int* recvBuff = malloc(opt->chunksize*sizeof(int));
   while (1) {
-    MPI_Recv(recvBuff,opt->chunksize,MPI_INT,0,SEND_TASK,MPI_COMM_WORLD,&status);
-    int nRecv = status.count;
+    MPI_Recv(recvBuff,opt->chunksize,MPI_INT,0,MPI_ANY_TAG,MPI_COMM_WORLD,&status);
+    if (status.MPI_TAG == TAG_QUIT) {
+      break;
+    }
+    MPI_Get_count(&status,MPI_INT,&nRecv);
+    #ifdef DEBUGGING
+      printf("rank %d received task. nRecv = %d\n",rank,nRecv);
+    #endif
     int i;
     int a;
     int b;
     int isGoldbach;
     for (i = 0;i < nRecv;i++) {
-      isGoldback = goldbach_partition(recvBuff[i],&a,&b);
-      if 
+      isGoldbach = goldbach_partition(recvBuff[i],&a,&b);
+      switch (isGoldbach) {
+        case 1:
+          if (opt->print_results == 1) {
+            printf("%d: %d/%d\n",recvBuff[i],a,b);
+          }
+        case 2:
+          break;
+        case 3:
+          printf("You disproved Goldbach's Conjecture! YAY!!!\n");
+          break;
+        default:
+          printf("Something went wrong with getting Goldbach partitions...\n");
+          if (opt->print_results == 1) {
+            printf("%d: %d/%d\n",recvBuff[i],a,b);
+          }
+      }
     }
+    #ifdef DEBUGGING
+      printf("rank %d requesting new task\n",rank);
+    #endif
+    MPI_Send(NULL,0,MPI_INT,0,REQUEST_TASK,MPI_COMM_WORLD);
   }
   free(recvBuff);
 }
