@@ -1,0 +1,2 @@
+Finding smallest integer n such that M(n)>=1700
+N(1700)=721013438: 1789/721011649

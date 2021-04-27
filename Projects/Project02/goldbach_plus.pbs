@@ -5,7 +5,7 @@
 #Lines that do not start with a # are commands to be run as part of this job. 
 
 #Set the name of the job. It will default for you to something ugly.
-#PBS -N wilfonba.Palindromes
+#PBS -N wilfonba.goldbach
 
 #Set the name of the generated output file and error files if you would like. I
 #generally don't change these, they deafult to reasonableness.
@@ -33,4 +33,4 @@
 #$PBS_O_WORKDIR is set to wherever you launched qsub from. Alternatively, you
 #could give the fullpath using ${PBS_O_HOME}/est_pi
 cd ${PBS_O_WORKDIR}
-mpirun ./palindrome --numwords=3 > 3WPTEST.txt
+mpirun ./goldbach_plus --p=1700 --chunksize=250 > big_number.txt

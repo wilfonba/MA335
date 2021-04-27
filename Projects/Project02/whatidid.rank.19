@@ -1,4 +1,4 @@
-ET: 0.306655
-Num Sends: 159
-Num partition calls: 7950
-Total number of data send: 477
+ET: 1254.576981
+Num Sends: 24354
+Num partition calls: 6088500
+Total number of data send: 73062
