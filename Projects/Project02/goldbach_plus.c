@@ -156,7 +156,7 @@ void workerStuff(options* opt) {
       isGoldbach = goldbach_partition(i,&a,&b);
       switch (isGoldbach) {
         case 1:
-          if (a == opt->p)
+          if (a >= opt->p)
           {
             //printf("N(%d)=%d: %d/%d\n",opt->p,i,a,b);
             SUCCESS[0] = i;
@@ -172,7 +172,7 @@ void workerStuff(options* opt) {
         default:
           printf("Something went wrong with getting Goldbach partitions...\n");
       }
-      if (SUCCESS[1] != 0) {
+      if (SUCCESS[0] != 0) {
         break;
       }
     }
