@@ -22,6 +22,7 @@ void my_allgather(int* sendbuf, int sendcount, int * recvbuf)
         if (myRank == 0) {
             MPI_Recv(temp,sendcount,MPI_INT,size - 1,0,MPI_COMM_WORLD,&status);
             MPI_Send(sendbuf,sendcount,MPI_INT,1,0,MPI_COMM_WORLD);
+            
         }
         else if (myRank < size - 1 && myRank > 0 && myRank%2 == 0) {
             MPI_Send(sendbuf,sendcount,MPI_INT,myRank + 1,0,MPI_COMM_WORLD);
@@ -35,8 +36,8 @@ void my_allgather(int* sendbuf, int sendcount, int * recvbuf)
             MPI_Send(sendbuf,sendcount,MPI_INT,0,0,MPI_COMM_WORLD);
             MPI_Recv(temp,sendcount,MPI_INT,myRank - 1,0,MPI_COMM_WORLD,&status);
         }
-        //MPI_Barrier(MPI_COMM_WORLD);
-        int k = (int)fmod(myRank - i + 1,size)*sendcount;
+        int k = abs(((myRank - 1 - i)%size)*sendcount);
+        printf("\nRank %d has k = %d when i = %d\n",myRank,k,i);
         memcpy(recvbuf + k,temp,sendcount*sizeof(int));
         memcpy(sendbuf,temp,sendcount*sizeof(int));
     }
