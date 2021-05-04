@@ -36,8 +36,8 @@ void my_allgather(int* sendbuf, int sendcount, int * recvbuf)
             MPI_Send(sendbuf,sendcount,MPI_INT,0,0,MPI_COMM_WORLD);
             MPI_Recv(temp,sendcount,MPI_INT,myRank - 1,0,MPI_COMM_WORLD,&status);
         }
-        int k = abs(((myRank - 1 - i)%size)*sendcount);
-        printf("\nRank %d has k = %d when i = %d\n",myRank,k,i);
+        int k = abs(((myRank - 1 - i + size)%size)*sendcount);
+        //printf("\nRank %d has k = %d when i = %d\n",myRank,k,i);
         memcpy(recvbuf + k,temp,sendcount*sizeof(int));
         memcpy(sendbuf,temp,sendcount*sizeof(int));
     }
