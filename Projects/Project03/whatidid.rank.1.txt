@@ -1,3 +1,0 @@
-total sends: 0
-No.	To	Data
-total recvs: 0
