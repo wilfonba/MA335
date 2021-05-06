@@ -4,6 +4,8 @@
 #include <mpi.h>
 #include <string.h>
 
+//#define DEBUG
+
 void my_gather(int* recvbuf,int recvcount,int* sendbuf,int sendcount,int root)
 {
     int size;
@@ -18,28 +20,13 @@ void my_gather(int* recvbuf,int recvcount,int* sendbuf,int sendcount,int root)
     int* currBuff = malloc(currBuffLeng*sizeof(int));
     currBuff = memcpy(currBuff,sendbuf,sendcount*sizeof(int));
     int itr = 0;
-    while ((myLabel%2 == 0) || (myLabel == maxLabel)) {
-        if (myLabel == maxLabel && maxLabel%2 != 0) {
-            printf("MAX LABEL = %d and I'm rank %d with label %d trying to send to %d of length %d\n\n",maxLabel,
-                    myRank,myLabel,(myRank - offset + size)%size,currBuffLeng/(int)pow(2,itr));
-            MPI_Send(currBuff,currBuffLeng,MPI_INT,(myRank - offset + size)%size,0,MPI_COMM_WORLD);
-            if (maxLabel == 1) {
-                break;
-            }
-        }
-        else if (myLabel == 0 && maxLabel%2 != 0) {
-            printf("MAX LABEL = %d and I'm rank %d with label %d trying to send to %d of length %d\n\n",maxLabel,
-                    myRank,myLabel,(myRank - offset + size)%size,currBuffLeng/(int)pow(2,itr));
-            int toSend = currBuffLeng/(int)pow(2,itr);
-            currBuffLeng += toSend;
-            currBuff = realloc(currBuff,currBuffLeng*sizeof(int));
-            MPI_Recv(currBuff + currBuffLeng - toSend,toSend,MPI_INT,(myRank + offset + size)%size,0,MPI_COMM_WORLD,NULL);
-        }
+    while (myLabel%2 == 0 && offset < size) {
         currBuffLeng*=2;
         currBuff = realloc(currBuff,currBuffLeng*sizeof(int));
-        if (myLabel != maxLabel) {
-            printf("\n      At itr %d rank %d (label %d) receiving from rank %d, MAX LABAEL = %d, buff leng = \n",
-                    itr,myRank,myLabel,(myRank+offset+size)%size,maxLabel,currBuffLeng);
+        if (myLabel < maxLabel) {
+            #ifdef DEBUG
+                printf("Rank %d receiving from rank %d\n",myRank,(myRank + offset + size)%size);
+            #endif
             MPI_Recv(currBuff + currBuffLeng/2,currBuffLeng/2,MPI_INT,(myRank + offset + size)%size,0,MPI_COMM_WORLD,NULL);
         }
         myLabel = myLabel/2;
@@ -51,15 +38,19 @@ void my_gather(int* recvbuf,int recvcount,int* sendbuf,int sendcount,int root)
         }
     }
     if (myLabel != 0) {
+        #ifdef DEBUG
+            printf("Rank %d sending to rank %d\n",myRank,(myRank - offset + size)%size);
+        #endif
         MPI_Send(currBuff,currBuffLeng,MPI_INT,(myRank - offset + size)%size,0,MPI_COMM_WORLD);
     }
-    else if (myLabel == 0) {
+    else {
         if (root == 0) {
             recvbuf = memcpy(recvbuf,currBuff,size*sendcount*sizeof(int));
         }
         else {
-            //recvbuf = memcpy(recvbuf,currBuff + (root+1)*sendcount,root*sendcount*sizeof(int));
-            //recvbuf = memcpy(recvbuf + root*sendcount,currBuff,(root+1)*sendcount*sizeof(int));
+            //recvbuf = memcpy(recvbuf,currBuff,size*sendcount*sizeof(int));
+            recvbuf = memcpy(recvbuf,currBuff + (size - root)*sendcount,root*sendcount*sizeof(int));
+            recvbuf = memcpy(recvbuf + root*sendcount,currBuff,(size - root)*sendcount*sizeof(int));
         }
     }
     free(currBuff);

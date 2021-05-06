@@ -1,5 +1,4 @@
 total sends: 0
 No.	To	Data
-total recvs: 1
-0	1	[39,13]
-Final Data: [7,43,39,13]
+total recvs: 0
+Final Data: 7555
