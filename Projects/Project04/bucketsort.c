@@ -7,6 +7,7 @@
 #include "mergesort.c"
 
 //#define DEBUG_BUCKET_CONTENTS
+#define DEBUG_BUCKET_SIZE
 
 
 //Takes a list L, of length n, whose elements are evenly distributed between a and b, and classify
@@ -85,13 +86,7 @@ void main(int argc, char** argv){
     MPI_Bcast(&opts.bucket_size_multiplier,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
     MPI_Bcast(&opts.a,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
     MPI_Bcast(&opts.b,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
-
-
-
     //print_options(&opts);
-
-
-
     printf("Bucket-Sorting %d elements using %d processes.\n",opts.n,opts.nproc);
     //print the initial list if is is nice and small
     if (opts.print_things){
@@ -122,7 +117,6 @@ void main(int argc, char** argv){
     double** buckets = malloc(numProcs*sizeof(double*));
     int* bucketLength = calloc(numProcs,sizeof(int));
     for (i = 0;i < numProcs;i++) {
-      //printf("Rank 0 allocating memory for each bucket\n");
       buckets[i] = malloc(bucketCap*sizeof(double));
     }
     fill_buckets(recvBuff,*sendCounts,opts.a,opts.b,buckets,numProcs,bucketCap,bucketLength);
@@ -134,6 +128,16 @@ void main(int argc, char** argv){
         printf("\n");
       }
     #endif
+
+    // Get my final bucket length by adding all the procs sub buckets
+    recvBuff = realloc(recvBuff,numProcs*sizeof(int));
+    MPI_Allreduce(bucketLength,recvBuff,numProcs,MPI_INT,MPI_SUM,MPI_COMM_WORLD);
+    #ifdef DEBUG_BUCKET_SIZE
+      printf("I am rank %d with an array of bucket sizes: ",myRank);
+      print_arr(recvBuff,numProcs);
+      printf("\n");
+    #endif
+
     
     // Free dynamic memory
     free(sendCounts);
@@ -163,20 +167,18 @@ void main(int argc, char** argv){
     if (myRank < opts.n/numProcs) {
       recvCount++;
     }
-    double* recvBuff = malloc(recvCount*sizeof(int));
+    double* recvBuff = malloc(recvCount*sizeof(double));
     MPI_Scatterv(NULL,0,0,MPI_DOUBLE,recvBuff,recvCount,MPI_DOUBLE,0,MPI_COMM_WORLD);
 
 
-    // Divide L_i into buckets B_ij
+    //Divide L_i into buckets B_ij
     int bucketCap = ceil((1.0*opts.n/numProcs)*opts.bucket_size_multiplier);
-    double** buckets = malloc(numProcs*sizeof(double*));
+    double** buckets = (double**)malloc(numProcs*sizeof(double*));
     int* bucketLength = calloc(numProcs,sizeof(int));
     for (i = 0;i < numProcs;i++) {
-      printf("Rank %d allocating memory for each bucket\n",myRank);
-      buckets[i] = malloc(bucketCap*sizeof(double));
+      buckets[i] = (double*)malloc(bucketCap*sizeof(double));
     }
     fill_buckets(recvBuff,recvCount,opts.a,opts.b,buckets,numProcs,bucketCap,bucketLength);
-    printf("other proc Successfully filled buckets\n");fflush(stdout);
     #ifdef DEBUG_BUCKET_CONTENTS
       for (i = 0;i < numProcs;i++) {
         printf("Rank %d bucket %d contains: ",myRank,i);
@@ -185,6 +187,14 @@ void main(int argc, char** argv){
       }
     #endif
 
+    // Get my resulting bucket length by adding all the procs sub buckets
+    recvBuff = realloc(recvBuff,numProcs*sizeof(int));
+    MPI_Allreduce(bucketLength,recvBuff,numProcs,MPI_INT,MPI_SUM,MPI_COMM_WORLD);
+    #ifdef DEBUG_BUCKET_SIZE
+      printf("I am rank %d with an array of bucket sizes: ",myRank);
+      print_arr(recvBuff,numProcs);
+      printf("\n");
+    #endif
 
 
 
