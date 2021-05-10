@@ -7,7 +7,9 @@
 #include "mergesort.c"
 
 //#define DEBUG_BUCKET_CONTENTS
-#define DEBUG_BUCKET_SIZE
+//#define DEBUG_BUCKET_SIZE
+#define DEBUG_SUB_BUCKET_SEND
+//#define DEBUG_ALLTOALLV
 
 
 //Takes a list L, of length n, whose elements are evenly distributed between a and b, and classify
@@ -86,8 +88,9 @@ void main(int argc, char** argv){
     MPI_Bcast(&opts.bucket_size_multiplier,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
     MPI_Bcast(&opts.a,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
     MPI_Bcast(&opts.b,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
-    //print_options(&opts);
+    print_options(&opts);
     printf("Bucket-Sorting %d elements using %d processes.\n",opts.n,opts.nproc);
+    
     //print the initial list if is is nice and small
     if (opts.print_things){
       printf("L: ");
@@ -120,7 +123,6 @@ void main(int argc, char** argv){
       buckets[i] = malloc(bucketCap*sizeof(double));
     }
     fill_buckets(recvBuff,*sendCounts,opts.a,opts.b,buckets,numProcs,bucketCap,bucketLength);
-    printf("Root successfuly filled buckets\n");fflush(stdout);
     #ifdef DEBUG_BUCKET_CONTENTS
       for (i = 0;i < numProcs;i++) {
         printf("Rank %d bucket %d contains: ",myRank,i);
@@ -129,15 +131,57 @@ void main(int argc, char** argv){
       }
     #endif
 
-    // Get my final bucket length by adding all the procs sub buckets
-    recvBuff = realloc(recvBuff,numProcs*sizeof(int));
-    MPI_Allreduce(bucketLength,recvBuff,numProcs,MPI_INT,MPI_SUM,MPI_COMM_WORLD);
+    // Get all final bucket lengths by adding all the procs sub buckets
+    int* sizeBuff = malloc(numProcs*sizeof(int));
+    MPI_Allreduce(bucketLength,sizeBuff,numProcs,MPI_INT,MPI_SUM,MPI_COMM_WORLD);
     #ifdef DEBUG_BUCKET_SIZE
       printf("I am rank %d with an array of bucket sizes: ",myRank);
-      print_arr(recvBuff,numProcs);
+      print_int_arr(sizeBuff,numProcs);
       printf("\n");
     #endif
 
+
+    // Prepare for and make alltoallv call
+    double* sendBuff = malloc(sendCounts[0]*sizeof(double));
+    free(recvBuff);
+    recvBuff = malloc(sizeBuff[myRank]*sizeof(double));
+    int* offsets = malloc(numProcs*sizeof(int));
+    offsets[0] = 0;
+    sendBuff = memcpy(sendBuff,buckets[0],bucketLength[0]*sizeof(double));
+    for (i = 1;i < numProcs;i++) {
+      offsets[i] = offsets[i - 1] + bucketLength[i - 1];
+      memcpy(sendBuff + offsets[i],buckets[i],bucketLength[i]*sizeof(double));
+    }
+    #ifdef DEBUG_SUB_BUCKET_SEND
+      printf("Rank %d has sub bucket send array: ",myRank);
+      print_arr(sendBuff,sendCounts[0]);
+      printf("Offsets:");
+      print_int_arr(offsets,numProcs);
+      printf("And bucket lengths: ");
+      print_int_arr(bucketLength,numProcs);
+      printf("\n");
+    #endif
+    ////////////////////////////////////////////////////////
+    /// Problems Starting Here   ///////////////////////////
+    ////////////////////////////////////////////////////////
+    int* recvCounts = malloc(numProcs*sizeof(int));
+    int* recvOffsets = malloc(numProcs*sizeof(int));
+    MPI_Alltoall(bucketLength,numProcs,MPI_INT,recvCounts,numProcs,MPI_INT,MPI_COMM_WORLD);
+    MPI_Alltoall(offsets,numProcs,MPI_INT,recvOffsets,numProcs,MPI_INT,MPI_COMM_WORLD);
+    #ifdef DEBUG_ALLTOALLV
+      printf("Rank %d has recvCounts: ",myRank);
+      print_int_arr(recvCounts,numProcs);
+      printf("\nand recvOffsets: ");
+      print_int_arr(recvOffsets,numProcs);
+      printf("\n");
+    #endif
+    free(recvBuff);
+    int recvCount = 0;
+    for (i = 0;i < numProcs;i++) {
+      recvCount += recvCounts[i];
+    }
+    recvBuff = malloc(recvCount*sizeof(double));
+    MPI_Alltoallv(sendBuff,bucketLength,offsets,MPI_DOUBLE,recvBuff,recvCounts,recvOffsets,MPI_DOUBLE,MPI_COMM_WORLD);
     
     // Free dynamic memory
     free(sendCounts);
@@ -146,6 +190,7 @@ void main(int argc, char** argv){
     free(L);
     free(buckets);
     free(bucketLength);
+    free(sizeBuff);
   }
   else {
     ///////////////////////////////////////////////////////////////////////
@@ -164,7 +209,7 @@ void main(int argc, char** argv){
 
     // Receive L_i
     int recvCount = opts.n/numProcs;
-    if (myRank < opts.n/numProcs) {
+    if (myRank < opts.n%numProcs) {
       recvCount++;
     }
     double* recvBuff = malloc(recvCount*sizeof(double));
@@ -187,14 +232,58 @@ void main(int argc, char** argv){
       }
     #endif
 
-    // Get my resulting bucket length by adding all the procs sub buckets
-    recvBuff = realloc(recvBuff,numProcs*sizeof(int));
-    MPI_Allreduce(bucketLength,recvBuff,numProcs,MPI_INT,MPI_SUM,MPI_COMM_WORLD);
+    // Get all final bucket lengths by adding all the procs sub buckets
+    int* sizeBuff = malloc(numProcs*sizeof(int));
+    MPI_Allreduce(bucketLength,sizeBuff,numProcs,MPI_INT,MPI_SUM,MPI_COMM_WORLD);
     #ifdef DEBUG_BUCKET_SIZE
       printf("I am rank %d with an array of bucket sizes: ",myRank);
-      print_arr(recvBuff,numProcs);
+      print_int_arr(sizeBuff,numProcs);
       printf("\n");
     #endif
+
+    // Prepare for and make alltoallv call
+    double* sendBuff = malloc(recvCount*sizeof(double));
+    free(recvBuff);
+    recvBuff = malloc(sizeBuff[myRank]*sizeof(double));
+    int* offsets = malloc(numProcs*sizeof(int));
+    offsets[0] = 0;
+    sendBuff = memcpy(sendBuff,buckets[0],bucketLength[0]*sizeof(double));
+    for (i = 1;i < numProcs;i++) {
+      offsets[i] = offsets[i - 1] + bucketLength[i - 1];
+      memcpy(sendBuff + offsets[i],buckets[i],bucketLength[i]*sizeof(double));
+    }
+    #ifdef DEBUG_SUB_BUCKET_SEND
+      printf("Rank %d has sub bucket send array: ",myRank);
+      print_arr(sendBuff,recvCount);
+      printf("Offsets:");
+      print_int_arr(offsets,numProcs);
+      printf("And bucket lengths: ");
+      print_int_arr(bucketLength,numProcs);
+      printf("\n");
+    #endif
+
+
+    ////////////////////////////////////////////////////////
+    /// Problems Starting Here   ///////////////////////////
+    ////////////////////////////////////////////////////////
+    int* recvCounts = malloc(numProcs*sizeof(int));
+    int* recvOffsets = malloc(numProcs*sizeof(int));
+    MPI_Alltoall(bucketLength,numProcs,MPI_INT,recvCounts,numProcs,MPI_INT,MPI_COMM_WORLD);
+    MPI_Alltoall(offsets,numProcs,MPI_INT,recvOffsets,numProcs,MPI_INT,MPI_COMM_WORLD);
+    #ifdef DEBUG_ALLTOALLV
+      printf("Rank %d has recvCounts: ",myRank);
+      print_int_arr(recvCounts,numProcs);
+      printf("\nand recvOffsets: ");
+      print_int_arr(recvOffsets,numProcs);
+      printf("\n");
+    #endif
+    free(recvBuff);
+    recvCount = 0;
+    for (i = 0;i < numProcs;i++) {
+      recvCount += recvCounts[i];
+    }
+    recvBuff = malloc(recvCount*sizeof(double));
+    MPI_Alltoallv(sendBuff,bucketLength,offsets,MPI_DOUBLE,recvBuff,recvCounts,recvOffsets,MPI_DOUBLE,MPI_COMM_WORLD);
 
 
 
@@ -202,6 +291,9 @@ void main(int argc, char** argv){
     free(recvBuff);
     free(buckets);
     free(bucketLength);
+    free(sizeBuff);
+    free(recvCounts);
+    free(recvOffsets);
   }
 
 
