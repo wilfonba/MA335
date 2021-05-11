@@ -63,7 +63,7 @@ void main(int argc, char** argv){
 
 
   int i;
-  if (myRank==0){
+  if (myRank==0) {
     ///////////////////////////////////////////////////////////////////////
     /////                    //////////////////////////////////////////////
     /////   Root STUFF       //////////////////////////////////////////////
@@ -336,8 +336,6 @@ void main(int argc, char** argv){
     free(recvCounts);
     free(recvOffsets);
   }
-
-
 
   //At the end, the master prints out the sorted list if necessary, prints the outputfile, and if requested it checks to make sure that the list really is sorted. 
   if (myRank==0){
