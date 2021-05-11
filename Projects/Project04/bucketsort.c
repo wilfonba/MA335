@@ -8,8 +8,10 @@
 
 //#define DEBUG_BUCKET_CONTENTS
 //#define DEBUG_BUCKET_SIZE
-#define DEBUG_SUB_BUCKET_SEND
+//#define DEBUG_SUB_BUCKET_SEND
 //#define DEBUG_ALLTOALLV
+//#define DEBUG_SORT
+//#define DEBUG_ALLTOALLV_RESULT
 
 
 //Takes a list L, of length n, whose elements are evenly distributed between a and b, and classify
@@ -161,36 +163,59 @@ void main(int argc, char** argv){
       print_int_arr(bucketLength,numProcs);
       printf("\n");
     #endif
-    ////////////////////////////////////////////////////////
-    /// Problems Starting Here   ///////////////////////////
-    ////////////////////////////////////////////////////////
     int* recvCounts = malloc(numProcs*sizeof(int));
     int* recvOffsets = malloc(numProcs*sizeof(int));
-    MPI_Alltoall(bucketLength,numProcs,MPI_INT,recvCounts,numProcs,MPI_INT,MPI_COMM_WORLD);
-    MPI_Alltoall(offsets,numProcs,MPI_INT,recvOffsets,numProcs,MPI_INT,MPI_COMM_WORLD);
-    #ifdef DEBUG_ALLTOALLV
-      printf("Rank %d has recvCounts: ",myRank);
-      print_int_arr(recvCounts,numProcs);
-      printf("\nand recvOffsets: ");
-      print_int_arr(recvOffsets,numProcs);
-      printf("\n");
-    #endif
-    free(recvBuff);
+    MPI_Alltoall(bucketLength,1,MPI_INT,recvCounts,1,MPI_INT,MPI_COMM_WORLD);
+    //MPI_Alltoall(offsets,1,MPI_INT,recvOffsets,1,MPI_INT,MPI_COMM_WORLD);
     int recvCount = 0;
     for (i = 0;i < numProcs;i++) {
       recvCount += recvCounts[i];
     }
-    recvBuff = malloc(recvCount*sizeof(double));
+    recvOffsets = memset(recvOffsets,0,numProcs*sizeof(int));
+    for (i = 1;i < numProcs;i++) {
+      recvOffsets[i] = recvOffsets[i-1] + recvCounts[i-1];
+    }
+    #ifdef DEBUG_ALLTOALLV
+      printf("Rank %d has send counts: ",myRank);
+      print_int_arr(bucketLength,numProcs);
+      printf("send offsets: ");
+      print_int_arr(offsets,numProcs);
+      printf("recv counts: ");
+      print_int_arr(recvCounts,numProcs);
+      printf("Recv offsets: ");
+      print_int_arr(recvOffsets,numProcs);
+      printf("\n");
+    #endif
+    recvBuff = realloc(recvBuff,recvCount*sizeof(double));
+    //MPI_Alltoallv(sendBuff,bucketLength,offsets,MPI_DOUBLE,recvBuff,recvCounts,recvOffsets,MPI_DOUBLE,MPI_COMM_WORLD);
     MPI_Alltoallv(sendBuff,bucketLength,offsets,MPI_DOUBLE,recvBuff,recvCounts,recvOffsets,MPI_DOUBLE,MPI_COMM_WORLD);
+    #ifdef DEBUG_ALLTOALLV_RESULT
+      printf("Rank %d with recvBuff: ",myRank);
+      print_arr(recvBuff,recvCount);
+    #endif
+    // Sort my bucket
+    mergesort(recvBuff,recvCount);
+    #ifdef DEBUG_SORT
+      printf("Rank %d with sorted list: ",myRank);
+      print_arr(recvBuff,recvCount);
+    #endif
+    // Get gatherV counts
+    int* recvSizeBuff = malloc(numProcs*sizeof(int));
+    MPI_Gather(&recvCount,1,MPI_INT,recvSizeBuff,1,MPI_INT,0,MPI_COMM_WORLD);
+    offsets = memset(offsets,0,numProcs*sizeof(int));
+    for (i = 1;i < numProcs;i++) {
+      offsets[i] = offsets[i-1] + recvSizeBuff[i-1];
+    }
+    MPI_Gatherv(recvBuff,recvCount,MPI_DOUBLE,L,recvSizeBuff,offsets,MPI_DOUBLE,0,MPI_COMM_WORLD);
     
     // Free dynamic memory
     free(sendCounts);
     free(sendIdxs);
     free(recvBuff);
-    free(L);
     free(buckets);
     free(bucketLength);
     free(sizeBuff);
+    free(recvSizeBuff);
   }
   else {
     ///////////////////////////////////////////////////////////////////////
@@ -245,8 +270,7 @@ void main(int argc, char** argv){
     double* sendBuff = malloc(recvCount*sizeof(double));
     free(recvBuff);
     recvBuff = malloc(sizeBuff[myRank]*sizeof(double));
-    int* offsets = malloc(numProcs*sizeof(int));
-    offsets[0] = 0;
+    int* offsets = calloc(numProcs,sizeof(int));
     sendBuff = memcpy(sendBuff,buckets[0],bucketLength[0]*sizeof(double));
     for (i = 1;i < numProcs;i++) {
       offsets[i] = offsets[i - 1] + bucketLength[i - 1];
@@ -263,29 +287,46 @@ void main(int argc, char** argv){
     #endif
 
 
-    ////////////////////////////////////////////////////////
-    /// Problems Starting Here   ///////////////////////////
-    ////////////////////////////////////////////////////////
     int* recvCounts = malloc(numProcs*sizeof(int));
     int* recvOffsets = malloc(numProcs*sizeof(int));
-    MPI_Alltoall(bucketLength,numProcs,MPI_INT,recvCounts,numProcs,MPI_INT,MPI_COMM_WORLD);
-    MPI_Alltoall(offsets,numProcs,MPI_INT,recvOffsets,numProcs,MPI_INT,MPI_COMM_WORLD);
-    #ifdef DEBUG_ALLTOALLV
-      printf("Rank %d has recvCounts: ",myRank);
-      print_int_arr(recvCounts,numProcs);
-      printf("\nand recvOffsets: ");
-      print_int_arr(recvOffsets,numProcs);
-      printf("\n");
-    #endif
-    free(recvBuff);
+    MPI_Alltoall(bucketLength,1,MPI_INT,recvCounts,1,MPI_INT,MPI_COMM_WORLD);
+    //MPI_Alltoall(offsets,1,MPI_INT,recvOffsets,1,MPI_INT,MPI_COMM_WORLD);
     recvCount = 0;
     for (i = 0;i < numProcs;i++) {
       recvCount += recvCounts[i];
     }
-    recvBuff = malloc(recvCount*sizeof(double));
+    recvOffsets = memset(recvOffsets,0,numProcs*sizeof(int));
+    for (i = 1;i < numProcs;i++) {
+      recvOffsets[i] = recvOffsets[i-1] + recvCounts[i-1];
+    }
+    #ifdef DEBUG_ALLTOALLV
+      printf("Rank %d has send counts: ",myRank);
+      print_int_arr(bucketLength,numProcs);
+      printf("send offsets: ");
+      print_int_arr(offsets,numProcs);
+      printf("recv counts: ");
+      print_int_arr(recvCounts,numProcs);
+      printf("Recv offsets: ");
+      print_int_arr(recvOffsets,numProcs);
+      printf("\n");
+    #endif
+    recvBuff = realloc(recvBuff,recvCount*sizeof(double));
+    //MPI_Alltoallv(sendBuff,bucketLength,offsets,MPI_DOUBLE,recvBuff,recvCounts,recvOffsets,MPI_DOUBLE,MPI_COMM_WORLD);
     MPI_Alltoallv(sendBuff,bucketLength,offsets,MPI_DOUBLE,recvBuff,recvCounts,recvOffsets,MPI_DOUBLE,MPI_COMM_WORLD);
+    #ifdef DEBUG_ALLTOALLV_RESULT
+      printf("Rank %d with recvBuff: ",myRank);
+      print_arr(recvBuff,recvCount);
+    #endif
+    // Sort my bucket
+    mergesort(recvBuff,recvCount);
+    #ifdef DEBUG_SORT
+      printf("Rank %d with sorted list: ",myRank);
+      print_arr(recvBuff,recvCount);
+    #endif
+    // Get gatherV counts
+    MPI_Gather(&recvCount,1,MPI_INT,NULL,0,MPI_INT,0,MPI_COMM_WORLD);
 
-
+    MPI_Gatherv(recvBuff,recvCount,MPI_DOUBLE,NULL,NULL,NULL,MPI_DOUBLE,0,MPI_COMM_WORLD);
 
     // Free dynamic memory
     free(recvBuff);
@@ -299,7 +340,7 @@ void main(int argc, char** argv){
 
 
   //At the end, the master prints out the sorted list if necessary, prints the outputfile, and if requested it checks to make sure that the list really is sorted. 
-  /*if (myRank==0){
+  if (myRank==0){
     if (opts.produce_outputfile){
       write_outputfile(opts.outputfile,L,opts.n);
     }
@@ -315,7 +356,8 @@ void main(int argc, char** argv){
 	      printf("L is NOT sorted ascending!!!\n");
       }
     }
-  }*/
+  }
+  free(L);
   MPI_Finalize();
 }
 
