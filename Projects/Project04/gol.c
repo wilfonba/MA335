@@ -3,8 +3,10 @@
 #include <math.h>
 #include <mpi.h>
 
+
 #include "gol_helpers.h"
 #include "gol_comm_helpers.h"
+#include "my_gol_helpers.h"
 
 //For reference, gol_helpers contains the following struct:
 /*typedef struct{
@@ -34,45 +36,17 @@ void playGol(options* o, gol_board* g,int myRank) {
   int i;
   get_block_dims(g->n_rows,g->n_cols,o->n_procs,&M,&N);
   get_block_coords(M,N,myRank,&bi,&bj);
-  int minRow = (bi*M + g->n_rows)%g->n_rows;
+  /*int minRow = (bi*M + g->n_rows)%g->n_rows;
   int maxRow = ((bi + 1)*M + g->n_rows - 1)%g->n_rows;
   int minCol = (bj*M + g->n_cols)%g->n_cols;
-  int maxCol = ((bj + 1)*M + g->n_cols - 1)%g->n_cols;
+  int maxCol = ((bj + 1)*M + g->n_cols - 1)%g->n_cols;*/
 
   for (i = 0;i < g->n_gens;i++) {
     // Get my edges to send to other processors
     get_assignment(g->n_rows,g->n_cols,M,N,bi,bj,leftEdge,rightEdge,bottomEdge,topEdge);
     // Receiv edges from neighboring processors
-    int source[8];  //Array of sources for all 8 neighbors for copying recvs to gameboard
-    source[0] = block_coords_to_rank(M,N,bi - 1,bj);
-    MPI_Sendrecv(leftEdge,M,MPI_INT,0,source[0],nLeftEdge,M,MPI_INT,source[0],0,MPI_COMM_WORLD,NULL);
-    source[1] = block_coords_to_rank(M,N,bi + 1,bj);
-    MPI_Sendrecv(rightEdge,M,MPI_INT,0,source[1],nRightEdge,M,MPI_INT,source[1],0,MPI_COMM_WORLD,NULL);
-    source[2] = block_coords_to_rank(M,N,bi,bj + 1);
-    MPI_Sendrecv(topEdge,N,MPI_INT,0,source[2],nTopEdge,N,MPI_INT,source[2],0,MPI_COMM_WORLD,NULL);
-    source[3] = block_coords_to_rank(M,N,bi,bj - 1);
-    MPI_Sendrecv(bottomEdge,N,MPI_INT,0,source[3],nBottomEdge,N,MPI_INT,source[3],0,MPI_COMM_WORLD,NULL);
-    source[4] = block_coords_to_rank(M,N,bi + 1,bj - 1);
-    MPI_Sendrecv(&nTLcorner,1,MPI_INT,0,source[4],&nBottomEdge[N],1,MPI_INT,source[4],0,MPI_COMM_WORLD,NULL);
-    source[5] = block_coords_to_rank(M,N,bi + 1,bj + 1);
-    MPI_Sendrecv(&nTRcorner,1,MPI_INT,0,source[5],&nBottomEdge[1],1,MPI_INT,source[5],0,MPI_COMM_WORLD,NULL);
-    source[6] = block_coords_to_rank(M,N,bi - 1,bj - 1);
-    MPI_Sendrecv(&nBLcorner,1,MPI_INT,0,source[6],&nTopEdge[N],1,MPI_INT,source[6],0,MPI_COMM_WORLD,NULL);
-    source[7] = block_coords_to_rank(M,N,bi - 1,bj + 1);
-    MPI_Sendrecv(&nBRcorner,1,MPI_INT,0,source[7],&nBottomEdge[1],1,MPI_INT,source[7],0,MPI_COMM_WORLD,NULL);
-
-    // Assign these edges and corners to my gol_board
-    g->state[i][maxRow + 1] = memcpy(g->state[i][maxRow + 1],nTopEdge,N);
-    g->state[i][minRow - 1] = memcpy(g->state[i][minRow - 1],nBottomEdge,N);
-    g->state[i][maxRow + 1][minCol - 1] = nTLcorner;
-    g->state[i][maxRow + 1][maxCol + 1] = nTRcorner;
-    g->state[i][minRow - 1][minCol - 1] = nBLcorner;
-    g->state[i][minRow - 1][maxCol + 1] = nBRcorner;
-    int j;
-    for (j = 0;j < M;j++) {
-      g->state[i][minCol - 1][maxRow - j] = nLeftEdge[j];
-      g->state[i][maxCol + 1][maxRow - j] = nRightEdge[j];
-    }
+    getNeighboringEdges(leftEdge,nLeftEdge,rightEdge,nRightEdge,topEdge,nTopEdge,bottomEdge,nBottomEdge,myRank,bi,bj,M,N);
+    getNeighboringCorners(topEdge,&nTLcorner,&nTRcorner,bottomEdge,&nBLcorner,&nBRcorner,myRank,bi,bj,M,N);
   }
 }
 

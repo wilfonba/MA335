@@ -1,4 +1,0 @@
-ET: 0.567546
-Misc sends: 0
-Sendrecv sends: 0
-set_state calls: 0
