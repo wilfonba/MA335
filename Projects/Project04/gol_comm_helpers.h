@@ -57,7 +57,8 @@ int block_coords_to_rank(int M,int N, int bi, int bj){
 }
 
 
-//Returns the leftmost column, the rightmost column, the bottom most row, and topmost row of the board that is covered by block bi,bj if the block grid is M x N and the board is m x n. 
+//Returns the leftmost column, the rightmost column, the bottom most row, and topmost row of the board that is covered by block bi,bj 
+//if the block grid is M x N and the board is m x n. 
 void get_assignment(int m, int n, int M, int N, int bi, int bj, int* left_edge,int* right_edge, int* bottom_edge, int* top_edge){
   
   int le_block_col[N];

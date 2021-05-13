@@ -56,7 +56,9 @@ void set_state(gol_board* g, int t, int i, int j,int val){
   g->state[t][(i+g->n_rows)%(g->n_rows)][(j+g->n_cols)%(g->n_cols)]=val;
 }
 
-//copies a chunk of a gol board, the part between min_row and max_row and min_col and max_col and generations min_gen to max_gen (inclusive), into a buffer.  the buffer must be pre-allocated by the caller.  The data is copied in generation major, then row major order.  Returns the number of ints that was put in the buffer (in ints) via bufsize.  If bufsize==NULL, this is ignored.
+//copies a chunk of a gol board, the part between min_row and max_row and min_col and max_col and generations min_gen to max_gen (inclusive), 
+//into a buffer.  the buffer must be pre-allocated by the caller.  The data is copied in generation major, then row major order.  Returns 
+//the number of ints that was put in the buffer (in ints) via bufsize.  If bufsize==NULL, this is ignored.
 
 //Handles negative rows and columns correctly, by wrapping around. 
 void copy_board_range_to_buffer(gol_board* g, int min_row, int max_row, int min_col, int max_col,int min_gen, int max_gen,int* buf, int* bufsize){
