@@ -1,6 +1,4 @@
-ET: 11.227769
-Misc sends: 2
-Alltoallv sends: 3125000
-Allgatherv sends: 0
-Scatterv sends: 0
-Gatherv sends: 3123334
+ET: 0.000349
+Misc sends: 0
+Sendrecv sends: 0
+set_state calls: 0

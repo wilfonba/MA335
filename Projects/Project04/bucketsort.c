@@ -39,7 +39,6 @@ void fill_buckets(double* L, int n, double a, double b, double** B, int m, int b
   }
 }
 
-
 void main(int argc, char** argv){
   
   MPI_Init(&argc,&argv);
@@ -212,10 +211,17 @@ void main(int argc, char** argv){
     free(sendCounts);
     free(sendIdxs);
     free(recvBuff);
+    for (i=0;i<numProcs;i++) {
+      free(buckets[i]);
+    }
     free(buckets);
     free(bucketLength);
     free(sizeBuff);
+    free(sendBuff);
+    free(offsets);
     free(recvSizeBuff);
+    free(recvCounts);
+    free(recvOffsets);
   }
   else {
     ///////////////////////////////////////////////////////////////////////
@@ -330,9 +336,14 @@ void main(int argc, char** argv){
 
     // Free dynamic memory
     free(recvBuff);
+    for (i=0;i<numProcs;i++) {
+      free(buckets[i]);
+    }
     free(buckets);
     free(bucketLength);
     free(sizeBuff);
+    free(sendBuff);
+    free(recvBuff);
     free(recvCounts);
     free(recvOffsets);
   }
