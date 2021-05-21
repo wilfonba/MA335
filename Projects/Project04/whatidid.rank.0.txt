@@ -1,6 +1,15 @@
+<<<<<<< HEAD
 ET: 0.005281
 Misc sends: 2
 Alltoallv sends: 17
 Allgatherv sends: 0
 Scatterv sends: 50
 Gatherv sends: 14
+=======
+ET: 0.002572
+Misc sends: 2
+Alltoallv sends: 334
+Allgatherv sends: 0
+Scatterv sends: 1000
+Gatherv sends: 330
+>>>>>>> 953dc07edb74b785b60c37c1586829a58f6f612f

@@ -144,7 +144,7 @@ void main(int argc, char** argv){
 
     // Prepare for and make alltoallv call
     double* sendBuff = malloc(sendCounts[0]*sizeof(double));
-    free(recvBuff);
+    //free(recvBuff);
     recvBuff = malloc(sizeBuff[myRank]*sizeof(double));
     int* offsets = malloc(numProcs*sizeof(int));
     offsets[0] = 0;
@@ -274,7 +274,7 @@ void main(int argc, char** argv){
 
     // Prepare for and make alltoallv call
     double* sendBuff = malloc(recvCount*sizeof(double));
-    free(recvBuff);
+    //free(recvBuff);
     recvBuff = malloc(sizeBuff[myRank]*sizeof(double));
     int* offsets = calloc(numProcs,sizeof(int));
     sendBuff = memcpy(sendBuff,buckets[0],bucketLength[0]*sizeof(double));
@@ -343,7 +343,6 @@ void main(int argc, char** argv){
     free(bucketLength);
     free(sizeBuff);
     free(sendBuff);
-    free(recvBuff);
     free(recvCounts);
     free(recvOffsets);
   }
