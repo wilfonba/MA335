@@ -36,15 +36,16 @@ void playGol(options* o, gol_board* g,int myRank) {
   int i;
   get_block_dims(g->n_rows,g->n_cols,o->n_procs,&M,&N);
   get_block_coords(M,N,myRank,&bi,&bj);
-  /*int minRow = (bi*M + g->n_rows)%g->n_rows;
-  int maxRow = ((bi + 1)*M + g->n_rows - 1)%g->n_rows;
-  int minCol = (bj*M + g->n_cols)%g->n_cols;
-  int maxCol = ((bj + 1)*M + g->n_cols - 1)%g->n_cols;*/
+  int minCol;
+  int maxCol;
+  int minRow;
+  int maxRow;
+  get_assignment(g->n_rows,g->n_cols,M,N,bi,bj,&minCol,&maxCol,&minRow,&maxRow);
 
   for (i = 0;i < g->n_gens;i++) {
     // Get my edges to send to other processors
-    get_assignment(g->n_rows,g->n_cols,M,N,bi,bj,leftEdge,rightEdge,bottomEdge,topEdge);
-    // Receiv edges from neighboring processors
+    
+    // Receive edges from neighboring processors
     getNeighboringEdges(leftEdge,nLeftEdge,rightEdge,nRightEdge,topEdge,nTopEdge,bottomEdge,nBottomEdge,myRank,bi,bj,M,N);
     getNeighboringCorners(topEdge,&nTLcorner,&nTRcorner,bottomEdge,&nBLcorner,&nBRcorner,myRank,bi,bj,M,N);
   }

@@ -1,0 +1,6 @@
+ET: 0.002572
+Misc sends: 2
+Alltoallv sends: 334
+Allgatherv sends: 0
+Scatterv sends: 1000
+Gatherv sends: 330
